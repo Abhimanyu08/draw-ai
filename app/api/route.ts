@@ -8,23 +8,23 @@ import { cookies } from "next/headers";
 const functions: Parameters<
 	typeof openai.chat.completions.create
 >["0"]["functions"] = [
-	{
-		name: "get_d3_docs",
-		description:
-			"Returns a string of relevant d3 api functions and their documentation",
-		parameters: {
-			type: "object",
-			properties: {
-				query: {
-					type: "string",
-					description:
-						"A string containing comma separated names of d3 concepts whose documentation is required.",
+		{
+			name: "get_d3_docs",
+			description:
+				"Returns a string of relevant d3 api functions and their documentation",
+			parameters: {
+				type: "object",
+				properties: {
+					query: {
+						type: "string",
+						description:
+							"A string containing comma separated names of d3 concepts whose documentation is required.",
+					},
 				},
+				required: ["query"],
 			},
-			required: ["query"],
 		},
-	},
-];
+	];
 
 export async function POST(request: Request) {
 	const supabase = createRouteHandlerClient<Database>({ cookies });
@@ -91,7 +91,6 @@ export async function POST(request: Request) {
 		});
 	}
 
-	console.log("Context:", context);
 	//-----------------------------Now send back the related documents and user query in a new chat message---------------------
 	const getCodeMessage: ChatMessages[number] = {
 		role: "user",
