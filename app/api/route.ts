@@ -44,7 +44,6 @@ export async function POST(request: Request) {
 
 	const conceptsToRetrieve = conceptsResponse.choices[0].message.content;
 
-	console.log("Concepts:", conceptsToRetrieve);
 	if (!conceptsToRetrieve) {
 		return new Response(null, {
 			status: 500,
@@ -64,7 +63,7 @@ export async function POST(request: Request) {
 	const { data, error } = await supabase.rpc("match_documents", {
 		query_embedding: conceptEmbeddings,
 		match_threshold: 0.7,
-		match_count: 10,
+		match_count: 3,
 	});
 
 	if (error) {
@@ -100,7 +99,7 @@ export async function POST(request: Request) {
 	};
 
 	const response = await openai.chat.completions.create({
-		model: "gpt-4",
+		model: "gpt-3.5-turbo-16k",
 		messages: [systemMessage, getCodeMessage],
 		stream: true,
 	});

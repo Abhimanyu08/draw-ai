@@ -18,7 +18,7 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<Script src="https://d3js.org/d3.v7.min.js"></Script>
-			<body className={inter.className}>{children}</body>
+			<body className={`${inter.className} dark`}>{children}</body>
 		</html>
 	);
 }

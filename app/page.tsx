@@ -2,8 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
-import { remark } from "remark";
-import strip from "strip-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { coldarkDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 export default function Home() {
 	const [query, setQuery] = useState(
@@ -38,7 +38,23 @@ export default function Home() {
 
 			const decodedValue = decoder.decode(value);
 
-			setCode((p) => p.concat(decodedValue));
+			setCode((p) => {
+				const newCode = p.concat(decodedValue);
+				const startRegex = /```javascript([\s\S]*)/;
+				console.log(newCode);
+				if (startRegex.test(newCode)) {
+					const match = newCode.match(startRegex)?.at(1);
+
+					return match || "";
+				}
+				const endRegex = /([\s\S]+)```/;
+				if (endRegex.test(newCode)) {
+					const match = newCode.match(endRegex)?.at(1);
+					return match || "";
+				}
+
+				return newCode;
+			});
 		}
 		setFinished(true);
 	};
@@ -47,43 +63,55 @@ export default function Home() {
 		if (!finished) return;
 		if (!code) return;
 
-		const codeSnippetMatch = code.match(/```javascript([\s\S]*)```/);
+		const previousScript = document.getElementById("generated-code");
+		if (previousScript) {
+			document.body.removeChild(previousScript);
+		}
 
-		if (codeSnippetMatch) {
-			let codeSnippet = codeSnippetMatch[1];
-
+		if (code) {
 			const script = document.createElement("script");
-			script.text = codeSnippet;
+			script.text = code;
+			script.id = "generated-code";
 			document.body.appendChild(script);
 		}
 	}, [finished]);
 
 	return (
-		<main className="flex min-h-screen flex-col items-center justify-between gap-2 p-6">
-			<div className="flex gap-4 w-full grow">
-				<textarea
-					name=""
-					id=""
-					className="basis-4/12 border-2 border-black"
-					value={code}
-					onChange={(e) => setCode(e.target.value)}
-				></textarea>
-				<div className="basis-8/12 flex flex-col items-center justify-center">
+		<main className="flex h-screen flex-col items-center gap-8 p-8">
+			<div className="flex gap-4 min-h-0 w-full h-[600px]">
+				<div className="basis-5/12 overflow-auto ">
+					<SyntaxHighlighter
+						language="javascript"
+						style={coldarkDark}
+						customStyle={{
+							width: "100%",
+							margin: "0px",
+							height: "100%",
+							paddingTop: "1px",
+						}}
+					>
+						{code}
+					</SyntaxHighlighter>
+				</div>
+
+				<div className="basis-7/12 flex flex-col items-end justify-center">
 					<svg
-						className="border-black border-2"
-						width={800}
-						height={600}
+						className="border-border border-2 rounded-sm bg-black box-content"
+						width={900}
+						height={700}
 					></svg>
 				</div>
 			</div>
-			<div className="flex gap-2 w-full">
+			<div className="flex gap-5 w-full">
 				<Input
 					className="grow"
 					id="inp"
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
 				/>
-				<Button onClick={() => onGenerate()}>Generate</Button>
+				<Button onClick={() => onGenerate()} className="">
+					Generate
+				</Button>
 			</div>
 		</main>
 	);
